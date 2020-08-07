@@ -5,7 +5,7 @@ using namespace std;
 int main() {
 
 	int n;
-	int map[10][100];
+	int map[10][1000];
 	cin >> n;
 	for (int y = 0; y < n; y++) {
 		for (int x = 0; x < n; x++) {
