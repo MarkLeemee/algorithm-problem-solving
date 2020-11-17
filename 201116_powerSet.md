@@ -1,50 +1,62 @@
 Q
- - 오름차순 정렬된 배열에서 target 인덱스를 찾으시오.
+ - 입력받은 문자열의 각 문자를 가지고 만들 수 있는 모든 부분집합을 리턴하시오.
 
- - 탐색속도는 O(log n)으로 하면서, target이 없을 시에는 -1을 리턴합니다.
+ - 중복된 원소(문자)를 허용하지 않으며, 결과는 알파벳 순으로 정렬되어야 합니다.
+
+ - 부분집합은 빈 문자열을 포합합니다.
 
  
 
 A
- - 배열이 오름차순으로 정렬되어 있기에 이진트리탐색(O(log n))으로 쉽게 풀 수 있는 문제입니다. 원리는 탐색 구역의 시작과 끝을 정하고, 그 중간값과 비교하면서 탐색 구역을 좁혀나가는 방식입니다. 
+ - JS에서 중복된 값을 제거하는 방법은 여러 개가 있습니다. (링크참조) 여기서는 ES6의 Set 함수를 활용하여 중복되는 값을 제거한 (배열을 만들고 정렬하여) 새로운 문자열을 만들었습니다.
+
+ - 부분집합의 생성은 재귀호출을 활용하였습니다. 빈 글자부터 1글자, 2글자, 3글자... 1글자씩 늘려가며 문자조합을 만드는 재귀함수를 활용하였습니다. 이때, 매개변수로 begin 값을 넣어서 중복값 및 정렬이 흐뜨러지지 않도록 잡았습니다.
 
 ```js
-const binarySearch = function (arr, target) {
-  let front = 0;
-  let end = arr.length - 1;
-  let mid = Math.floor((front + end) / 2);
-  while (arr[mid] !== target) {
-    if(front > end) {
-      return -1;
+const powerSet = function (str) {
+  const set = Array.from(new Set(str));
+  set.sort();
+  let newStr = set.join("");
+  
+  let result = [];
+  function recursion(string, begin) {
+    result.push(string);
+    for(let i = begin; i < newStr.length; i++) {
+      recursion(string+newStr[i], i + 1);
     }
-    if(arr[mid] < target) {
-      front = mid + 1;
-    } else {
-      end = mid - 1;
-    }
-    mid = Math.floor((front + end) / 2);
   }
-  return mid;
+  
+  recursion('', 0);
+  return result;
 };
 ```
 
- - 위의 풀이와 원리는 같지만, while문의 조건을 반대로 넣어준 경우입니다.
+ - 정렬된 배열과 reduce를 활용하여 중복된 값을 제거하였습니다. 정렬된 배열의 중복된 값은 순서가 붙어있으니, 이를 찾아 제거하는 로직입니다.
+
+ - 여기서는 각각의 케이스(글자수)마다 전체 탐색을하여 마지막 조건문(문자열 마지막까지 탐색)시에 추가해주는 형태입니다. 이전 형태보다 전체탐색을 많이하기에 이전코드보다는 비효율적인 코드입니다.
 
 ```js
-const binarySearch = function (arr, target) {
-  let left = 0,
-    right = arr.length - 1;
-  while (left <= right) {
-    let middle = parseInt((right + left) / 2);
-    if (arr[middle] === target) {
-      return middle;
-    }
-    if (target < arr[middle]) {
-      right = middle - 1;
+const powerSet = function (str) {
+  const sorted = str.split('').sort();
+  const deduplicated = sorted.reduce((acc, item) => {
+    if (acc[acc.length - 1] === item) {
+      return acc;
     } else {
-      left = middle + 1;
+      return acc.concat(item);
     }
-  }
-  return -1;
+  });
+
+  let subSets = [];
+  const pickOrNot = (idx, subset) => {
+    if (idx === deduplicated.length) {
+      subSets.push(subset);
+      return;
+    }
+    pickOrNot(idx + 1, subset);
+    pickOrNot(idx + 1, subset + deduplicated[idx]);
+  };
+  
+  pickOrNot(0, '');
+  return subSets.sort();
 };
 ```
